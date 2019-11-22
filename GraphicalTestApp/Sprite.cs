@@ -29,6 +29,28 @@ namespace GraphicalTestApp
             Y = -Height / 2;
         }
 
+        public Texture2D Texture { get { return _texture; } }
+
+        public float Top
+        {
+            get { return YAbsolute + 0.5f; }
+        }
+
+        public float Bottom
+        {
+            get { return YAbsolute + Height + 0.5f; }
+        }
+
+        public float Left
+        {
+            get { return XAbsolute + 0.5f; }
+        }
+
+        public float Right
+        {
+            get { return XAbsolute + Width + 0.5f; }
+        }
+
         //Draw the Sprite to the screen
         public override void Draw()
         {

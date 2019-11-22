@@ -1,6 +1,7 @@
 ﻿using System;
 using Raylib;
 using RL = Raylib.Raylib;
+using System.IO;
 
 namespace GraphicalTestApp
 {
@@ -61,6 +62,45 @@ namespace GraphicalTestApp
                 _next = value;
                 if (_root == null) _root = value;
             }
+        }
+
+        private Room LoadRoom(string path)
+        {
+            StreamReader reader = new StreamReader(path);
+
+            int width, height;
+
+            Int32.TryParse(reader.ReadLine(), out width);
+            Int32.TryParse(reader.ReadLine(), out height);
+
+            Room room = new Room(width, height);
+
+            for (int y = 0; y < height; y++)
+            {
+                string row = reader.ReadLine();
+                for (int x = 0; x < width; x++)
+                {
+                    char tile = row[x];
+                    switch (tile)
+                    {
+                        case '1':
+                            room.AddChild(new Wall(x, y));
+                            break;
+                        case '@':
+                            Player p = new Player(x, y);
+                            p.X = x;
+                            p.Y = y;
+                            room.AddChild(p);
+                            break;
+                        case 'e':
+                            Enemy e = new Enemy(x, y);
+                            e.X = x;
+                            e.Y = y;
+                            break;
+                    }
+                }
+            }
+            return room;
         }
     }
 }

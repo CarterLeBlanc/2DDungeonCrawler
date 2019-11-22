@@ -16,6 +16,18 @@ namespace GraphicalTestApp
             game.Root = root;
 
             //## Set up game here ##//
+            Player player = new Player(12, 76);
+
+            Sword sword = new Sword();
+            //player.AddChild(sword);
+
+            Wall wall = new Wall(13, 76);
+
+            Enemy enemy = new Enemy(12, 76);
+
+            root.AddChild(player);
+            //root.AddChild(wall);
+            //root.AddChild(enemy);
 
             game.Run();
         }
