@@ -8,21 +8,28 @@ namespace GraphicalTestApp
 {
     class Sword : Actor
     {
+        private static Sword _instance;
+        AABB _hitbox;
+
         public Sword()
         {
-            Sprite sprite = new Sprite("Graphics/Breakdown.png");
+            _instance = this;
+
+            Sprite sprite = new Sprite("Graphics/Dagger.png");
             AddChild(sprite);
 
-            AABB Hitbox = new AABB(sprite.Width, sprite.Height);
-            AddChild(Hitbox);
+            _hitbox = new AABB(sprite.Width, sprite.Height);
+            AddChild(_hitbox);
+        }
+        
+        public static Sword Instance
+        {
+            get { return _instance; }
         }
 
-        private void Orbit(float deltaTime)
+        public AABB Hitbox
         {
-            foreach(Actor sword in _children)
-            {
-                sword.Rotate(5f * deltaTime);
-            }
+            get { return _hitbox; }
         }
     }
 }

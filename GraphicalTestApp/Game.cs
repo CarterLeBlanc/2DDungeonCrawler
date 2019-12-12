@@ -24,6 +24,9 @@ namespace GraphicalTestApp
         //Run the game loop
         public void Run()
         {
+            Camera2D camera = new Camera2D();
+            camera.zoom = 3;
+
             //Update and draw until the game is over
             while (!RL.WindowShouldClose())
             {
@@ -44,7 +47,8 @@ namespace GraphicalTestApp
 
                 //Draw the active Scene
                 RL.BeginDrawing();
-                RL.ClearBackground(Color.BLACK);
+                RL.BeginMode2D(camera);
+                RL.ClearBackground(Color.BROWN);
                 _root.Draw();
                 RL.EndDrawing();
             }
@@ -62,45 +66,6 @@ namespace GraphicalTestApp
                 _next = value;
                 if (_root == null) _root = value;
             }
-        }
-
-        private Room LoadRoom(string path)
-        {
-            StreamReader reader = new StreamReader(path);
-
-            int width, height;
-
-            Int32.TryParse(reader.ReadLine(), out width);
-            Int32.TryParse(reader.ReadLine(), out height);
-
-            Room room = new Room(width, height);
-
-            for (int y = 0; y < height; y++)
-            {
-                string row = reader.ReadLine();
-                for (int x = 0; x < width; x++)
-                {
-                    char tile = row[x];
-                    switch (tile)
-                    {
-                        case '1':
-                            room.AddChild(new Wall(x, y));
-                            break;
-                        case '@':
-                            Player p = new Player(x, y);
-                            p.X = x;
-                            p.Y = y;
-                            room.AddChild(p);
-                            break;
-                        case 'e':
-                            Enemy e = new Enemy(x, y);
-                            e.X = x;
-                            e.Y = y;
-                            break;
-                    }
-                }
-            }
-            return room;
         }
     }
 }

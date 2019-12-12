@@ -34,6 +34,10 @@ namespace GraphicalTestApp
         }
 
         //Creates an Entity at the specified coordinates
+        public Entity()
+        {
+
+        }
         public Entity(float x, float y)
         {
             X = x;
@@ -43,7 +47,10 @@ namespace GraphicalTestApp
         public override void Update(float deltaTime)
         {
             //## Calculate velocity from acceleration ##//
+            _velocity += _acceleration * deltaTime;
             //## Calculate position from velocity ##//
+            X += _velocity.x * deltaTime;
+            Y += _velocity.y * deltaTime;
             base.Update(deltaTime);
         }
     }

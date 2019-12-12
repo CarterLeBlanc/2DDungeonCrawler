@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace GraphicalTestApp
 {
@@ -19,14 +20,13 @@ namespace GraphicalTestApp
         public bool Solid { get; set; } = false;
         public int SizeX { get; set; }
         public int SizeY { get; set; }
-        public Actor CurrentScene { get; set; }
+        public static Actor CurrentScene { get; set; }
         public Sprite Sprite { get; set; }
-        public AABB Hitbox { get; set; }
         private bool[,] _collision;
 
         protected List<Actor> _children = new List<Actor>();
-        private List<Actor> _additions = new List<Actor>();
-        private List<Actor> _removals = new List<Actor>();
+        protected List<Actor> _additions = new List<Actor>();
+        protected List<Actor> _removals = new List<Actor>();
         private List<Actor>[,] _tracking;
         private List<Entity>[,] _tracking2;
 
@@ -68,7 +68,22 @@ namespace GraphicalTestApp
         public float GetRotation()
         {
             //## Implement getting the rotation of _localTransform ##//
-            return 0;
+            return (float)Math.Atan2(_localTransform.m21, _localTransform.m11);
+        }
+
+        public float GetRotationAbsolute()
+        {
+            return (float)Math.Atan2(_globalTransform.m21, _globalTransform.m11);
+        }
+
+        public Vector3 GetDirection()
+        {
+            return new Vector3(_localTransform.m12, _localTransform.m11, 0);
+        }
+
+        public new Vector3 GetDirectionAbsolute()
+        {
+            return new Vector3(_globalTransform.m12, _globalTransform.m11, 0);
         }
 
         public void Rotate(float radians)
@@ -93,39 +108,27 @@ namespace GraphicalTestApp
         public void AddChild(Actor child)
         {
             //## Implement AddChild(Actor) ##//
-            if (child.Parent != null)
+            if (_additions.Contains(child) || child == null)
             {
                 return;
             }
 
             child.Parent = this;
-            _children.Add(child);
+            _additions.Add(child);
         }
 
         public void RemoveChild(Actor child)
         {
             //## Implement RemoveChild(Actor) ##//
-            bool isMyChild = _children.Remove(child);
-
-            if (isMyChild)
+            if (_removals.Contains(child))
             {
-                child.Parent = null;
-                child._localTransform = child._globalTransform;
+                return;
             }
+
+            _removals.Add(child);
+            child.Parent = null;
         }
 
-        public bool GetCollision(float x, float y)
-        {
-            if (x >= 0 && y >= 0 && x < SizeX && y < SizeY)
-            {
-                return _collision[(int)x, (int)y];
-            }
-
-            else
-            {
-                return true;
-            }
-        }
         public List<Entity> GetEntities(float x, float y)
         {
             int checkX = (int)Math.Round(x);
@@ -186,27 +189,6 @@ namespace GraphicalTestApp
             //Call this Actor's OnUpdate events
             OnUpdate?.Invoke(deltaTime);
 
-            //Clear the collision grid
-            _collision = new bool[SizeX, SizeY];
-
-            foreach (Actor a in _additions)
-            {
-                //Set the Actor's collision in the collision grid
-                int x = (int)Math.Round(a.XAbsolute);
-                int y = (int)Math.Round(a.YAbsolute);
-
-                if (x >= 0 && x < SizeX
-                    && y >= 0 && y < SizeY)
-                {
-                    _tracking[x, y].Add(a);
-
-                    if (!_collision[x, y])
-                    {
-                        _collision[x, y] = a.Solid;
-                    }
-                }
-            }
-
             //Add all the Actors readied for addition
             foreach (Actor a in _additions)
 
@@ -226,9 +208,7 @@ namespace GraphicalTestApp
             foreach (Actor a in _removals)
 
             {
-
                 //Add a to _children
-
                 _children.Remove(a);
 
             }
@@ -239,11 +219,8 @@ namespace GraphicalTestApp
             //Update all of this Actor's children
 
             foreach (Actor child in _children)
-
             {
-
                 child.Update(deltaTime);
-
             }
         }
 

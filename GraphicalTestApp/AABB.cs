@@ -4,13 +4,6 @@ namespace GraphicalTestApp
 {
     class AABB : Actor
     {
-        private Vector3 _min = new Vector3(float.NegativeInfinity,
-                                    float.NegativeInfinity,
-                                    float.NegativeInfinity);
-        private Vector3 _max = new Vector3(float.PositiveInfinity,
-                                    float.PositiveInfinity,
-                                    float.PositiveInfinity);
-
         public float Width { get; set; } = 1;
         public float Height { get; set; } = 1;
 
@@ -48,32 +41,24 @@ namespace GraphicalTestApp
         public bool DetectCollision(AABB other)
         {
             //## Implement DetectCollision(AABB) ##//
-            return !(_max.x < other._min.x || _max.y < other._min.y ||
-                _min.x > other._max.x || _min.y > other._max.y);
+            return !(Bottom < other.Top || Right < other.Left ||
+                Top > other.Bottom || Left > other.Right);
         }
 
         public bool DetectCollision(Vector3 point)
         {
             //## Implement DetectCollision(Vector3) ##//
-            return !(point.x < _min.x || point.y < _min.y ||
-                point.x > _max.x || point.y > _max.y);
+            return !(point.x < Left || point.y < Top ||
+                point.x > Right || point.y > Bottom);
         }
 
         //Draw the bounding box to the screen
         public override void Draw()
         {
 
-            Raylib.Rectangle rec = new Raylib.Rectangle(
+            Raylib.Rectangle rec = new Raylib.Rectangle(Left, Top, Width, Height);
 
-                XAbsolute - Width / 2,
-
-                YAbsolute - Height / 2,
-
-                Width,
-
-                Height);
-
-            Raylib.Raylib.DrawRectangleLinesEx(rec, 1, Raylib.Color.RED);
+            Raylib.Raylib.DrawRectangleLinesEx(rec, 1, Raylib.Color.GREEN);
 
             base.Draw();
         }

@@ -12,42 +12,30 @@ namespace GraphicalTestApp
         private static float y;
 
         private Direction _facing;
+        private AABB _hitbox;
+        private Sprite _sprite;
+        public Room CurrentRoom;
+        Timer timer = new Timer();
 
-        public float Speed { get; set; } = 10f;
+        public float Speed { get; set; } = 100f;
 
-        public Enemy(float x, float y) : base(12, 76)
+        public Enemy(float x, float y) : base(x, y)
         {
             _facing = Direction.North;
             OnUpdate += Move;
+            OnUpdate += TouchSword;
             OnUpdate += TouchPlayer;
-            OnUpdate += Spin;
 
-            Sprite sprite = new Sprite("Graphics/BitesZaDusto.png");
-            AddChild(sprite);
+            _sprite = new Sprite("Graphics/spooder.png");
+            AddChild(_sprite);
 
-            AABB Hitbox = new AABB(sprite.Width, sprite.Height);
-            AddChild(Hitbox);
+            _hitbox = new AABB(_sprite.Width, _sprite.Height);
+            AddChild(_hitbox);
         }
 
-        private void TouchPlayer(float deltaTime)
+        public AABB Hitbox
         {
-            List<Entity> touched;
-            touched = CurrentScene.GetEntities(X, Y);
-            bool hit = false;
-            
-            foreach (Entity e in touched)
-            {
-                if (e is Player)
-                {
-                    hit = true;
-                    break;
-                }
-            }
-
-            if (hit)
-            {
-                CurrentScene.RemoveChild(this);
-            }
+            get { return _hitbox; }
         }
 
         private void Move(float deltaTime)
@@ -71,63 +59,83 @@ namespace GraphicalTestApp
 
         private void MoveUp(float deltaTime)
         {
-            if (!CurrentScene.GetCollision(XAbsolute, Sprite.Top - Speed * deltaTime))
+            if (!CurrentRoom.GetCollision(X, _hitbox.Top))
             {
-                YVelocity = -Speed * deltaTime;
+                YVelocity = -Speed;
             }
 
             else
             {
-                YVelocity = 0f;
-                _facing = Direction.East;
+                _facing = Direction.West;
             }
         }
 
         private void MoveDown(float deltaTime)
         {
-            if (!CurrentScene.GetCollision(XAbsolute, Sprite.Bottom + Speed * deltaTime))
+            if (!CurrentRoom.GetCollision(X, _hitbox.Bottom))
             {
-                YVelocity = Speed * deltaTime;
+                YVelocity = Speed;
             }
 
             else
             {
-                YVelocity = 0f;
-                _facing = Direction.West;
+                _facing = Direction.East;
             }
         }
 
         private void MoveLeft(float deltaTime)
         {
-            if (!CurrentScene.GetCollision(Sprite.Left - Speed * deltaTime, YAbsolute))
+            if (!CurrentRoom.GetCollision(_hitbox.Left, Y))
             {
-                XVelocity = -Speed * deltaTime;
+                XVelocity = -Speed;
             }
 
             else
             {
-                XVelocity = 0f;
-                _facing = Direction.North;
+                _facing = Direction.South;
             }
         }
 
         private void MoveRight(float deltaTime)
         {
-            if (!CurrentScene.GetCollision(Sprite.Right + Speed * deltaTime, YAbsolute))
+            if (!CurrentRoom.GetCollision(_hitbox.Right, Y))
             {
-                XVelocity = Speed * deltaTime;
+                XVelocity = Speed;
             }
 
             else
             {
-                XVelocity = 0f;
-                _facing = Direction.South;
+                _facing = Direction.North;
             }
         }
 
-        public void Spin(float deltaTime)
+        private void TouchSword(float deltaTime)
         {
-            Rotate(0.01f);
+            if (Sword.Instance != null)
+            {
+                if (_hitbox.DetectCollision(Sword.Instance.Hitbox) && timer.Seconds >= 1f)
+                {
+                    Y = -1000;
+                    Parent.RemoveChild(this);
+                }
+            }
+        }
+
+        private void TouchPlayer(float deltaTime)
+        {
+            if (Player.Instance == null || Parent == null)
+            {
+                return;
+            }
+
+            else if(Player.Instance != null)
+            {
+                if (_hitbox.DetectCollision(Player.Instance.Hitbox) && timer.Seconds >= 1f)
+                {
+                    Player.Instance.Y = -1000;
+                    Parent.RemoveChild(Player.Instance);
+                }
+            }
         }
     }
 }
